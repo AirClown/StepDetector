@@ -16,6 +16,9 @@ public class SensorController implements SensorEventListener {
     public interface SensorCallback{
         //加速度
         void refreshAcc(float[] accs);
+
+        //系统步态
+        void refreshStep(int step);
     }
 
     private SensorCallback callback;
@@ -40,6 +43,9 @@ public class SensorController implements SensorEventListener {
         switch (event.sensor.getType()){
             case Sensor.TYPE_ACCELEROMETER:
                 callback.refreshAcc(event.values.clone());
+                break;
+            case Sensor.TYPE_STEP_COUNTER:
+                callback.refreshStep((int)event.values[0]);
                 break;
         }
     }

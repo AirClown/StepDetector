@@ -11,10 +11,8 @@ import java.math.RoundingMode;
 
 public class StepController {
 
-    //状态：静止
+    //状态
     public static int STAY=0;
-
-    //状态：运动
     public static int MOVE=1;
 
     //运动状态判断数组
@@ -30,7 +28,7 @@ public class StepController {
     private int count=0;
 
     //行走步数
-    private int Step=0;
+    public int Step=0;
 
     //步长
     private float Length=0;
@@ -40,6 +38,8 @@ public class StepController {
 
     //状态
     private int State=STAY;
+
+    public float[] value=new float[2];
 
     //回调
     public interface StepCallback{
@@ -76,7 +76,6 @@ public class StepController {
             }
             ave /= Accs.length;
 
-            //调整数组顺序，把新数据放在前面，同时把数据减去均值
             float[] data = new float[Accs.length];
             for (int i = 0, j = count; i < data.length; ++i, --j) {
                 if (j < 0) j += data.length;
@@ -128,11 +127,16 @@ public class StepController {
                         float H = data[peak] - 0.5f * data[ckpoint] - 0.5f * data[valley];
                         long T = time[(count - ckpoint + time.length) % time.length] - time[(count - valley + time.length) % time.length];
 
+                        Log.e("StepController","H:"+H+",T:"+T);
                         //门限判决
-                        if (H > 3 && T > 300 && T < 1400) {
+                        if (H > 3 && T > 200 && T < 1400) {
                             //步长计算
                             DetectStepLength((int) T, H);
+                            value[0]=value[0]*Step+T;
+                            value[1]=value[1]*Step+H;
                             ++Step;
+                            value[0]/=Step;
+                            value[1]/=Step;
                             callback.refreshStep(Step,Length,Distance);
                         }
                     }

@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -26,14 +27,26 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+
+        @Override
+        public void refreshStep(int step) {
+            Rsysstep=step;
+            if (Osysstep==0){
+                Osysstep=step;
+            }else{
+                tv.setText("系统计步器:"+(Rsysstep-Osysstep)+ "\n算法计步器:"+stepController.Step+
+                "\nT:"+stepController.value[0]+"\nH:"+stepController.value[1]);
+            }
+        }
     };
 
     private StepController stepController;
     private StepController.StepCallback stepCallback=new StepController.StepCallback() {
         @Override
         public void refreshStep(int step, float stepLength, float distance) {
-
-            dv.setText(step+"/"+stepLength);
+            Rmystep=step;
+            tv.setText("系统计步器:"+(Rsysstep-Osysstep)+ "\n算法计步器:"+stepController.Step+
+                    "\nT:"+stepController.value[0]+"\nH:"+stepController.value[1]);
         }
 
         @Override
@@ -47,28 +60,51 @@ public class MainActivity extends AppCompatActivity {
     };
 
     private DataView dv;
-    private Button bt;
+    private Button bt,bt2;
+    private TextView tv;
 
     private boolean stop=false;
+
+    private int Osysstep=0;
+    private int Omystep=0;
+    private int Rsysstep=0;
+    private int Rmystep=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.main);
 
         sensorController=new SensorController((SensorManager)getSystemService(Context.SENSOR_SERVICE),sensorCallback);
         sensorController.registerSensor(Sensor.TYPE_ACCELEROMETER,SensorManager.SENSOR_DELAY_UI);
+        sensorController.registerSensor(Sensor.TYPE_STEP_COUNTER,SensorManager.SENSOR_DELAY_UI);
 
         stepController=new StepController(stepCallback);
 
         dv=findViewById(R.id.dataview);
         dv.setLength(100);
 
+        tv=findViewById(R.id.textView);
+
         bt=findViewById(R.id.button);
         bt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 stop=!stop;
+            }
+        });
+
+        bt2=findViewById(R.id.button2);
+        bt2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                stepController.Step=0;
+                stepController.value[0]=0;
+                stepController.value[1]=0;
+                Osysstep=Rsysstep;
+
+                tv.setText("系统计步器:"+(Rsysstep-Osysstep)+ "\n算法计步器:"+stepController.Step+
+                        "\nT:"+stepController.value[0]+"\nH:"+stepController.value[1]);
             }
         });
     }
